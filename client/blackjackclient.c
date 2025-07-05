@@ -28,19 +28,37 @@ int client_connection_init();
 // usata per accorciare il codice e aumentare la leggibilità
 void close_connection()
 {
-  closesocket(ConnectSocket);
-  WSACleanup();
+    closesocket(ConnectSocket);
+    WSACleanup();
 }
 
 int client_connection_init()
 {
 
-  // inizio libreria
-  iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
+    // inizio libreria
+    iResult = WSAStartup(MAKEWORD(2,2), &wsaData);
 
-  if (iResult != 0)
-  {
-    printf("WSAStartup failed: %d\n", iResult);
-    return 1;
-  }
+    if (iResult != 0)
+    {
+        printf("WSAStartup failed: %d\n", iResult);
+        return 1;
+    }
+
+    // setup socket
+    ZeroMemory(&hints, sizeoff(hints));
+
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_protocol = IPPROTO_TCP;
+
+    iResult = getaddrinfo(NULL, DEFAULT_PORT, &hints, &result);
+
+    if (iResult != 0)
+    {
+        printf("getaddrinfo failed: %d\n", iResult);
+        WSACleanup();
+        return 1;
+    }
+
+
 
