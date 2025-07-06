@@ -13,6 +13,8 @@
 #include <string.h>
 #include "blackjackclient.h"
 
+// valori di default usati per la porta.
+// il client si connette di default a localhost
 #define DEFAULT_PORT "27015"
 #define DEFAULT_BUFLEN 128
 
@@ -32,6 +34,8 @@ void close_connection()
     WSACleanup();
 }
 
+// inizia la connessione del client al server
+// valori di ritorno: 1 in caso di errore nella connessione, 0 in caso di successo
 int client_connection_init()
 {
 
@@ -60,5 +64,54 @@ int client_connection_init()
         return 1;
     }
 
+    // crea socket
+    ConnectSocket = INVALID_SOCKET;
+    ptr = result;
 
+    ConnectSocket = socket(ptr->ai_family, ptr->ai_socktype, ptr->ai_protocol);
+
+    if (ConnectSocket == INVALID_SOCKET)
+    {
+        printf("Error at socket(): %ld\n", WSAGetLastError());
+        freeaddrinfo(result);
+        WSACleanup();
+        return 1;
+    }
+
+    // connetti al server
+    iResult = connect(ConnectSocket, ptr->ai_addr, (int)ptr->ai_addrlen);
+
+    if (iResult == SOCKET_ERROR)
+    {
+        closesocket(ConnectSocket);
+        ConnectSocket = INVALID_SOCKET;
+    }
+
+    freeaddrinfo(result);
+
+    if (ConnectSocket == INVALID_SOCKET)
+    {
+        printf("Unable to connect to server!\n);
+        WSACleanup();
+        return 1;
+    }
+
+    return 0;
+}
+    
+// gestisce il processo di registrazione e di login con il server
+int server_login(char username[], char password[], MODE mode)
+{
+    init_result = client_connection_init();
+
+    if (init_result == 1)
+    {
+        return 1;
+    }
+
+    // manda username da salvare
+    sprintf_s(qbuffer, DEFAULT_BUFLEN, "Username:%s", username);
+
+    iResult = send(ConnectSocket, qbuffer, DEFAULT_BUFLEN, 0);
+}
 
