@@ -113,5 +113,77 @@ int server_login(char username[], char password[], MODE mode)
     sprintf_s(qbuffer, DEFAULT_BUFLEN, "Username:%s", username);
 
     iResult = send(ConnectSocket, qbuffer, DEFAULT_BUFLEN, 0);
+
+    if (iResult < 0)
+    {
+        printf("recv failed: %d\n", WSAGetLastError());
+        return 1;
+    }
+    else if (iResult == 0)
+    {
+        printf("server connection closed without warning\n");
+        return 1;
+    }
+
+    // manda password da salvare
+    sprintf_s(qbuffer, DEFAULT_BUFLEN, "Password:%s", password);
+
+    iResult = send(ConnectSocket, qbuffer, DEFAULT_BUFLEN, 0);
+
+    if (iResult == SOCKET_ERROR)
+    {
+        printf("send failed: %d\n", WSAGetLastError());
+        close_connection();
+        return 1;
+    }
+
+    iResult = recv(ConnectSocket, recvbuf, DEFAULT_BUFLEN, 0);
+
+    if (iResult < 0)
+    {
+        printf("recv failed: %d\n", WSAGetLastError());
+        close_connection();
+        return 1;
+    }
+    else if (iResult == 0)
+    {
+        printf("server connection closed without warning\n");
+        close_connection();
+        return 1;
+    }
+
+    // esegui registrazione o login
+    if (mode == LOGIN_MODE)
+    {
+
+        strcpy(qbuffer, "Login");
+
+        iResult = send(ConnectSocket, qbuffer, DEFAULT_BUFLEN, 0);
+
+        if (iResult == SOCKET_ERROR)
+        {
+            printf("send failed: %d\n", WSAGetLastError());
+            close_connection();
+            return 1;
+        }
+
+        iResult = recv(ConnectSocket, recvbuf, DEFAULT_BUFLEN, 0);
+
+        if (strcmp(recvbuf, "logok") == 0)
+        {
+            printf("login successful\n");
+
+            iResult = shutdown(ConnectSocket, SD_SEND);
+
+            if (iResult == SOCKET_ERROR)
+            {
+                printf("shutdown failed: %d\n", WSAGetLastError());
+                return 1;
+            }
+
+            closesocket(ConnectSocket);
+            WSACleanup();
+            return LOGIN_SUCCESS;
+        }
 }
 
