@@ -1,5 +1,6 @@
 // diverse variabili sono dichiarate come globali per essere usate da tutte le funzioni liberamente.
 // le variabili sono dichiarate come static per chiarire il loro scopo, ma la dichiarazione come static o meno non influisce sul funzionamento del codice.
+// in alcune parti si potrebbe migliorare la visibilità del codice rendendo funzioni alcune parti ripetute 2 o 3 volte
 
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
