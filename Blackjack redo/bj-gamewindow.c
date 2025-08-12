@@ -148,6 +148,7 @@ void GameWindow_init(float gw_screen_width, gw_screen_height)
     }
 }
 
+// il valore di ritorno della funzione indica se bisogna iniziare una nuova partita
 bool GameStart(bool is_online)
 {
     if (!IsWindowState(FLAG_BORDERLESS_WINDOWED_MODE))
@@ -224,7 +225,7 @@ bool GameStart(bool is_online)
             window_draw_card(PlayerHand[i], PlayerCardRecArray[i]);
         }
 
-        for (int i = player_card_number; i < MAX_HAND_SIZE; i++)
+        for (int i = player_card_num; i < MAX_HAND_SIZE; i++)
         {
             DrawRectangleRec(PlayerCardRecArray[i], GREEN);
         }
@@ -263,5 +264,138 @@ bool GameStart(bool is_online)
         surrend_button_pressed = GuiButton(ButtonArray[2], "SURREND");
         doubledown_button_pressed = GuiButton(ButtonArray[3], "DOUBLE!");
         bet_button_pressed = GuiButton(ButtonArray[4], "BET!");
+
+        if (is_online)
+        {
+            sprintf_s(money_value_string, DEFAULT_BUFLEN, "MONEY = %d", money_value);
+            DrawTextEx(DefaultFont, money_value_string, MoneyTextVec, 32, 3, WHITE);
+            sprintf_s(money_bet_string, DEFAULT_BUFLEN, "BET = %d", money_bet);
+            DrawTextEx(DefaultFont, money_bet_string, MoneyBetTextVec, 32, 3, WHITE);
+
+        }
+
+        button_collision = false;
+        for (int i = 0; i < BUTTON_NUMBER; i++)
+        {
+            if (CheckCollisionPointRec(GetMousePosition(), ButtonArray[i]))
+            {
+                button_collision = true;
+            }
+        }
+
+        if (button_collision)
+        {
+            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+        }
+        else
+        {
+            SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+        }
+
+        if (set_bet)
+        {
+            money_bet = draw_bet_screen();
+        }
+
+        if (end_game)
+        {
+            // ordine di azioni
+            // 1. Player Bust
+            // 2. Player Blackjack
+            // 3. Player Charlie
+            // 3. Dealer Blackjack
+            // 4. Dealer Bust
+            // 5. Player Win
+            // 6. Player Lose
+            // 7. Player Draw
+
+            if (player_hand_score > BLACKJACK_SCORE)
+            {
+                endgame_code = PLAYER_BUST;
+
+                if (is_online && !updated_money)
+                {
+                    money_value_update(-money_bet);
+                    updated_money = true;
+                }
+            }
+            else if (player_hand_score == BLACKJACK_SCORE)
+            {
+                endgame_code = PLAYER_BLACKJACK;
+
+                if (is_online && !updated_money)
+                {
+                    money_value_update(money_bet * 2);
+                    updated_money = true;
+                }
+            }
+            else if (player_card_num == MAX_CARD_NUM)
+            {
+                endgame_code = PLAYER_CHARLIE;
+
+                if (is_online && !updated_money)
+                {
+                    money_value_update(money_bet);
+                    updated_money = true;
+                }
+            }
+            else if (dealer_hand_score == BLACKJACK_SCORE)
+            {
+                endgame_code = DEALER_BLACKJACK;
+
+                if (is_online && !updated_money)
+                {
+                    money_value_update(-money_bet);
+                    updated_money = true;
+                }
+            }
+            else if (dealer_hand_score > BLACKJACK_SCORE)
+            {
+                endgame_code = DEALER_BUST;
+
+                if (is_online && !updated_money)
+                {
+                    money_value_update(money_bet);
+                    updated_money = true;
+                }
+            }
+            else if (dealer_hand_score < player_hand_score)
+            {
+                endgame_code = PLAYER_WIN;
+
+                if (is_online && !updated_money)
+                {
+                    money_value_update(money_bet);
+                    updated_money = true;
+                }
+            }
+            else if (dealer_hand_score > player_hand_score)
+            {
+                endgame_code = PLAYER_LOSE;
+
+                if (is_online && !updated_money)
+                {
+                    money_value_update(-money_bet);
+                    updated_money = true;
+                }
+            }
+            else if (dealer_hand_score == player_hand_score)
+            {
+                endgame_code = PLAYER_DRAW
+            }
+
+            draw_end_screen(endgame_code)
+        }
+
+        EndDrawing();
+
+        if (retry)
+        {
+            free(GameDeck.cards);
+            return true;
+        }
     }
+
+    free(GameDeck.cards);
+    return false;
 }
