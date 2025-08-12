@@ -24,20 +24,14 @@ int main(void)
     InitWindow(1200, 625, "Blackjack");
     SetTargetFPS(60);
 
-    ONMODE online_play = MainMenu();
+    bool online_play = MainMenu();
     bool retry = false;
 
-    if (online_play == ERR_VALUE)
+    do
     {
-        exit(1);
-    }
-    else
-    {
-        do
-        {
-            retry = GameStart(online_play);
-        } while (retry == true);
-    }
+        retry = GameStart(online_play);
+    } while (retry = true);
+
 
     return 0;
 }
