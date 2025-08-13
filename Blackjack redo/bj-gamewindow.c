@@ -9,12 +9,12 @@
 #include "bj-gamewindow.h"
 
 #ifndef STRUCTS_INCLUDE
-#def STRUCTS_INCLUDE
+#define STRUCTS_INCLUDE
 #include "bj-structs.h"
 #endif
 
 #ifndef BOOL_INCLUDE
-#def BOOL_INCLUDE
+#define BOOL_INCLUDE
 #include <stdbool.h>
 #endif
 
