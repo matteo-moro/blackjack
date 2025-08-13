@@ -71,7 +71,7 @@ void GameWindow_init(float gw_screen_width, gw_screen_height)
 
     end_game = retry = set_bet = updated_money = hit_button_pressed =
         stand_button_pressed = surrent_button_pressed = doubledown_button_pressed =
-        bet_button_pressed = button_collision = end_screem_changed = bet_screen_changed = false;
+        bet_button_pressed = button_collision = end_screen_changed = bet_screen_changed = false;
 
     CardFont = LoadFontEx("JqkasWild-w1YD6.ttf", 128, 0, 250);
     SuitFont = LoadFontEx("JqkasWild-w1YD6.tff", 32, 0, 250);
@@ -398,4 +398,97 @@ bool GameStart(bool is_online)
 
     free(GameDeck.cards);
     return false;
+}
+
+void window_draw_card(CARD card_to_draw, Rectangle card_location)
+{
+    static Vector2 suit_text_size;
+    static Vector2 card_top_left;
+    static Vector2 card_top_right;
+    static Vector2 card_bot_left;
+    static Vector2 card_bot_right;
+
+    // CLUBS è usato come esempio visto che tutti i simboli hanno dimensioni simili
+    suit_text_size = MeasureTextEx(SuitFont, CLUBS, (float)SuitFont.baseSize, 0);
+
+    card_top_left.x = card_bot_left.x = (card_location.x + rel_x) - (suit_text_size.x / 2.0f);
+    card_top_left.y = card_top_right.y  = (card_location.y + rel_y) - (suit_text_size.y / 2.0f);
+    card_top_right.x = card_bot_right.x = (card_location.x + card_location.width - rel_x) - (suit_text_size.x / 2.0f);
+    card_bot_left.y = card_bot_right.y = (card_location.y + card_location.height - rel_y) - (suit_text_size.y / 2.0f);
+
+    static char suit_string[2] = "";
+
+    if (strcmp(card_to_draw.suit, "Clubs") == 0)
+    {
+        strcpy(suit_string, CLUBS);
+    }
+    else if (strcmp(card_to_draw.suit, "Diamonds") == 0)
+    {
+        strcpy(suit_string, DIAMONDS);
+    }
+    else if (strcmp(card_to_draw.suit, "Hearts") == 0)
+    {
+        strcpy(suit_string, HEARTS);
+    }
+    else
+    {
+        strcpy(suit_string, SPADES);
+    }
+
+    static Color text_color;
+    text_color = (strcmp(suit_string, CLUBS) == 0 || strcmp(suit_string, SPADES)) ? BLACK : RED;
+
+    DrawRectangleRec(place_to_draw, RAYWHITE);
+
+    DrawTextEx(SuitFont, suit_string, card_top_left, (float)SuitFont.baseSize, 0, text_color);
+    DrawTextEx(SuitFont, suit_string, card_top_right, (float)SuitFont.baseSize, 0, text_color);
+    DrawTextEx(SuitFont, suit_string, card_bot_left, (float)SuitFont.baseSize, 0, text_color);
+    DrawTextEx(SuitFont, suit_string, card_bot_right, (float)SuitFont.baseSize, 0, text_color);
+
+    static const char rank_str_array[][3] = { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
+    static char rank_str[3] = "";
+
+    strcpy(rank_str, rank_str_array[card_to_draw.rank - 1]);
+
+    static Vector2 rank_text_size;
+    rank_text_size = MeasureTextEx(CardFont, rank_str, (float)CardFont.baseSize, 2);
+
+    static Vector2 rank_position;
+    rank_position.x = (card_location.x + (card_location.width / 2.0f)) - (rank_text_size.x / 2.0f);
+    rank_position.y = (card_location.y + (card_loaction.height / 2.0f)) - (rank_text_size.y / 2.0f);
+
+    DrawTextEx(CardFont, rank_str, rank_position, (float)CardFont.baseSize, 2, text_color);
+}
+
+static Rectangle EndMessageBGRec;
+static Rectangle RetryButtonRec;
+static Vector2 EndscreenTextPos;
+static Vector2 EndTextSize;
+static Vector2 EndTextFinalPos;
+static char EndMessage[DEFAULT_BUFLEN];
+
+void draw_end_screen_init()
+{
+    if (sizes_changed && !end_screen_changed)
+    {
+        EndMessageBGRec.x = screen_width * 0.2f;
+        EndMessageBGRec.y = screen_height * 0.3f;
+        EndMessageBGRec.width = screen_width * 0.5f;
+        EndMessage.height = screen_height * 0.4f;
+
+        EndScreenTextPos.x = screen_width * 0.45f;
+        EndScreenTextPos.y = screen_height * 0.4f;
+
+        RetryButtonRec.x = screen_width * 0.4f;
+        RetryButtonRec.y = screen_height * 0.5f;
+        RetryButtonRec.width = screen_width * 0.1f;
+        RetryButtonRec.height = screen_height * 0.05f;
+
+        end_screen_changed = true;
+    }
+}
+
+void draw_end_screen(SIGNAL mode)
+{
+
 }
